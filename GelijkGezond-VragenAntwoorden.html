@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GelijkGezond - Vragen en Antwoorden</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #78B673;
+            --primary-blue: #49B8B0;
+            --border-radius: 10px;
+            --padding: 20px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Kumbh Sans', sans-serif;
+        }
+
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--padding);
+            background: #f5f5f5;
+        }
+
+        .header {
+            padding: var(--padding);
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            border-radius: var(--border-radius);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 120px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .header-content {
+            text-align: left;
+            padding-right: 420px;
+        }
+
+        .header-title {
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .last-modified {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .logo {
+            height: 270px;
+            width: auto;
+            position: absolute;
+            right: var(--padding);
+            top: -75px;
+        }
+
+        .controls {
+            display: flex;
+            gap: var(--padding);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box, .date-range {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            background: white;
+            color: #333;
+        }
+
+        input[type="date"] {
+            min-width: 150px;
+        }
+
+        .date-range {
+            position: relative;
+            min-width: 300px;
+        }
+
+        .date-range label {
+            white-space: nowrap;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .expand-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: 'Kumbh Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .expand-button:hover {
+            opacity: 0.9;
+        }
+
+        .category {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: white;
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            color: white;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-item {
+            border-top: 1px solid #eee;
+            padding: 15px;
+        }
+
+        .question {
+            cursor: pointer;
+            padding: 10px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .answer {
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+            line-height: 1.6;
+        }
+
+        .list-item {
+            display: flex;
+            margin: 5px 0;
+            align-items: flex-start;
+        }
+
+        .list-item .number,
+        .list-item .bullet {
+            flex: 0 0 20px;
+            text-align: right;
+            padding-right: 8px;
+        }
+
+        .list-item .content {
+            flex: 1;
+            padding-left: 8px;
+        }
+
+        .answer br {
+            display: block;
+            margin: 5px 0;
+            content: "";
+        }
+
+        .date {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .toggle-icon {
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+
+        .date-range-picker {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .date-range-popup {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-top: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .date-range-popup.active {
+            display: block;
+        }
+
+        .date-range-popup input[type="date"] {
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        .date-range-popup label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .date-range-popup button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1 class="header-title">Vragen en Antwoorden</h1>
+            <div class="last-modified">Datum laatste wijziging: 4-4-2025</div>
+        </div>
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" alt="GelijkGezond Logo" class="logo">
+    </div>
+
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Zoek in vragen en antwoorden...">
+        </div>
+        <div class="date-range">
+            <input type="text" id="dateRange" class="date-range-picker" readonly placeholder="Selecteer datum bereik">
+            <div class="date-range-popup">
+                <div style="margin-bottom: 10px;">
+                    <label>Van:</label>
+                    <input type="date" id="dateStart">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Tot:</label>
+                    <input type="date" id="dateEnd">
+                </div>
+                <button class="expand-button" style="width: 100%" id="applyDateRange">Toepassen</button>
+            </div>
+        </div>
+        <button class="expand-button" id="expandAll">Alle categorieën uitvouwen</button>
+    </div>
+
+    <div id="faq-container">
+        
+            <div class="category">
+                <div class="category-header">
+                    <span>Financieel model</span>
+                    <span class="toggle-icon">+</span>
+                </div>
+                <div class="category-items">
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Hoe zeker is het veiligstellen van doorlopende resultaatgerichte betalingen van gemeenten en verzekeraars? Welke afspraken zijn hier nu al over? En hoe wordt de bereidwilligheid ervaren tot nu toe?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De gesprekken over resultaatbetaling met gemeentes en verzekeraars zijn work-in-progress.<br>
+Met de gemeentes Amersfoort, Dordrecht en Tilburg bespreken we gezamenlijk hoe het resultaatbetalingsmodel eruit kan zien, hoe de benodigde data wordt verzameld, hoe de gemeente hier controle op kan uitoefenen en hoe de afspraken juridisch worden vormgegeven. Deze onderwerpen worden uitgewerkt met ondersteuning van SiRM en onder sturing van een stuurgroep met de directeuren Sociaal Domein van de drie genoemde gemeentes.
+<br>De Gemeente Zoetermeer, waar we recent een intentieverklaring mee hebben getekend, gaat aanhaken bij deze discussie. Om hen bij te praten zijn de stappen die we tot nu toe hebben gezet beschreven. Dit document is opgenomen in de dataroom (4.C).
+<br>Uitwerking van het model vindt plaats met de betrokken gemeentes en de directeuren Sociaal Domein staan welwillend ten aanzien van de rol. Maar er zijn (d.d. 2 april 2025) nog geen handtekeningen gezet.
+<br>Met de zorgverzekeraars loopt een vergelijkbaar proces. Samen met VGZ is een eenvoudig resultaatbetalingsmodel overeengekomen (dataroom 4.C) waar ook DSW en Zorg en Zekerheid (informeel) op raad van bestuur-niveau mee hebben ingestemd. Handtekeningen zijn echter nog niet gezet. <br>Samen met VGZ wordt actief gesproken met de andere grote verzekeraars (CZ, Menzis en Zilveren Kruis). We werken toe naar een bespreking van de resultaatbetalingsrol van de verzekeraars in de Beleidscommissie Zorg van Zorgverzekeraars Nederland op 22 mei. In deze commissie zitten de directeuren Zorg van alle zorgverzekeraars.
+<br>Merk overigens op dat met de goedkeuring van het transformatieplan, zorgverzekeraars in principe instemmen met geleidgerichte contractering. Echter, om de goede relaties met zorgverzekeraars in stand te houden, hechten we eraan om de rol van resultaatbetaler expliciet met hen af te spreken (en niet impliciet via het transformatieplan).
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Op welk moment komen de betaling van IZA-transformatiefondsen en de resultaatbetalingen van gemeenten/zorgverzekeraars binnen, en hoe sluit dit aan op de uitgaven voor de doorbijters op de lange termijn? Hoe houdt het financiële model rekening met de tijdsvertraging tussen het leveren van ondersteunende diensten en het realiseren van kostenbesparingen?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De IZA transformatiemiddelen komen beschikbaar als specifieke KPI’s zijn behaald. Zie de sectie over de KPIs in het transformatieplan (dataroom 3, pagina 51 en verder). In het financieel model (dataroom 4.A) zijn deze betalingen ook opgenomen na realisatie van de KPI’s met daarbovenop een administratieve vertraging van 3 maanden).<br>
+De resultaatbetalingen zijn opgenomen na afloop van de ondersteuningstrajecten met een extra administratieve vertraging van 3 maanden.
+<br>Het grootste deel van de IZA transformatiemiddelen en de resultaatbetalingen komen derhalve pas na afloop van het ondersteuningstraject van de inwoner en daarmee nadat de kosten voor deze ondersteuning al zijn gemaakt. Om deze mismatch in kosten en opbrengsten op te vangen hebben we de voorfinanciering van de impact investeerders nodig.
+<br>In het financieel model zijn de verwachte kasstromen op maandniveau inzichtelijk gemaakt.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Het plan toont een financieringsbehoefte van €3-4 miljoen voor de eerste fase. Wat is de voorgestelde structuur van de lening binnen de bredere financieringsmix? Welke vraag en positie heeft de voorkeur voor Impact door Groei? Wanneer is bij voorkeur welk bedrag benodigd?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            GelijkGezond is een stichting en kan derhalve geen aandelen uitgeven om eigen vermogen aan te trekken. In de financieringsbehoefte van €3-4 mln voor de startfase moeten we derhalve volledig voorzien met leningen. Hierbij kijken we wel naar een mix van achtergestelde en senior leningen.<br>
+Ook zoeken we naar een mix van leningverstrekkers. Op dit moment spreken we met impact financiers (zoals ‘Impact door Groei’), institutionele investeerders (waaronder Invest-NL en de Council of Europe Development Bank) en informele investeerders. Onze ideale mix bestaat uit een combinatie van impact financiers, vanwege het inhoudelijke perspectief dat zij meenemen, en institutionele investeerders, vanwege de mogelijkheid om door te financieren.
+<br>Met de mogelijke financiers spreken we over de financiering van de twee fases (€12mln) gecombineerd, met name om te zorgen dat de omvang van de transactie voldoende groot is om interessant te zijn voor de institutionele partijen. Beschikbaar komen van financiële middelen voor de uitbouwfase is daarbij natuurlijk conditioneel op het behalen van resultaat in de startfase.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Zijn er al resultaten die de aannames van het financieel model onderbouwen?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            GelijkGezond bouwt voort op veel pilots die in Nederland zijn gedaan rondom het ondersteunen van de inwoners met problemen op meerdere levensdomeinen die (tijdelijk) niet zelfredzaam zijn. In het transformatieplan zijn drie van deze pilots beschreven die onderbouwen dat de resultaten die wij voorzien, haalbaar zijn (pagina 29 en verder).<br>
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="category">
+                <div class="category-header">
+                    <span>Samenwerkingen en contractuele afspraken</span>
+                    <span class="toggle-icon">+</span>
+                </div>
+                <div class="category-items">
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Hoe zijn jullie gekomen tot de huidige set gemeenten?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De gemeentes Amersfoort en Tilburg hebben we zelf benaderd op basis van onze inschatting dat de (toenmalige) directeuren Sociaal Domein open zouden staan voor een vernieuwende idee. Mede op hun introductie hebben we daarna een presentatie gehouden voor het Netwerk Directeuren Sociaal Domein. Naar aanleiding daarvan zijn we in contact gekomen met de gemeente Dordrecht. Met de gemeente Zoetermeer zijn we in gesprek gekomen op introductie van de directeur van (zorg- en welzijnaanbieder) Fundis.<br>
+Momenteel spreken we ook met de gemeente Ede (op introductie van Menzis), Delft (op introductie van DSW) en Rotterdam (op introductie van de regionale huisartsenorganisatie).<br><br>Overigens hebben we ook met gemeentes gesproken waarmee (nog) geen vervolgtraject is ingezet, bijvoorbeeld Amsterdam, Den Bosch, Lelystad en Hilversum.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Bestaat er een duidelijk samenwerkingskader met andere lokale organisaties (denk aan wijkverpleging, welzijnsstichtingen, buurtteams, huisartsen) om de instroom te hebben en vervolgens de doorverwijzing?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De huisartsen zijn (in ieder geval bij de start) ons belangrijkste kanaal naar de inwoners. We zetten in op de huisarts omdat deze vaak de laatste vertrouwde hulpverlener is. Ook leert de ervaring dat als mensen problematiek die meerdere levensdomeinen die niet wordt opgelost, dat vrijwel leidt tot medische klachten (zoals depressiviteit, rugpijn, migraine, etc.) waarmee zij zich melden bij de huisarts. Tot slot zijn de huisartsen zelf soms handelingsverlegen in deze gevallen omdat zij vermoeden dat de medische klachten het gevolg zijn van onderliggende, niet-medische problematiek, maar kunnen zij zelf de inwoner daar niet in ondersteunen.<br>
+Daarnaast zoeken we in alle gemeentes afstemming met lokale welzijnsorganisaties en buurtteams. Deze organisaties bieden al veel ondersteuningsmogelijkheden waarmee het overgrote deel van de inwoners prima kan worden geholpen. Samen met hen willen we ervoor zorgen dat alleen die inwoners door de doorbijter worden ondersteund, die de bestaande organisaties niet voldoende kunnen ondersteunen.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Wat gebeurt er als de gemeenten en/of verzekeraars, door politieke of financiële redenen, uitstel of beperking van betalingen toepassen?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De resultaatbetalingsafspraken met gemeentes en zorgverzekeraars worden contractueel vastgelegd voor de startfase. Verandering van politieke kleur nog financiële problemen zijn geen grond voor het openbreken van bestaande afspraken.<br>
+Mocht gemeentes of zorgverzekeraars toch besluiten om niet meer te betalen, dan zal GelijkGezond de ondersteuning van inwoners in die gemeente en/of verzekerd bij die specifieke zorgverzekeraar moeten stoppen. En in het uiterste geval komt de Stichting GelijkGezond in financiële problemen met een faillissement als slechts mogelijke uitkomst.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Hoe is het contact met huisartsen voor voldoende draagvlak?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            In alle gemeentes hebben we zeer goed contact met de regionale huisartsenorganisatie (RHO). Draagvlak van de RHO is cruciaal voor ons werkproces. Vanwege dit belang is een getekende intentieverklaring met de RHO een randvoorwaarde voor aanvang van de startfase in een gemeente en is dit criterium ook opgenomen in de KPI’s in het transformatieplan.
+Impact meting en resultaten
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="category">
+                <div class="category-header">
+                    <span>Impact meting en resultaten</span>
+                    <span class="toggle-icon">+</span>
+                </div>
+                <div class="category-items">
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Hoe worden gedaalde kosten gemeten? Welke specifieke statistieken worden gebruikt om de effectiviteit van de doorbijters te evalueren, afgezien van kostenbesparingen?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De kostendaling bij de gemeente wordt bepaald op basis van een afgesproken resultaatbepalingsmodel. Zie het document ‘Beschrijvend document GelijkGezond_01042025.pdf’ in de dataroom (sectie 4.C).<br>
+De kostendaling binnen de Zorgverzekeringswet wordt vastgesteld op basis van een analyse van declaratiegegevens. Deze analyses worden uitgevoerd door een onderzoekspartner die binnen de CBS microdata omgeving mag werken. Een finale keuze over deze partner moet nog worden gemaakt, waarbij de Stichting Amsterdam Health and Technology Institute in ieder geval beschikbaar is en gemandateerd om te werken binnen de CBS microdata omgeving.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Hoe worden verbeteringen in de kwaliteit van leven gemeten en geverifieerd?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            Naast kosten volgen we ook nadrukkelijk de ervaren brede gezondheid van inwoners. Dit doen we op twee manieren<br><div class="list-item numbered">
+                        <span class="number">1.</span>
+                        <span class="content">Door inwoners (minimaal) bij de start, na 6 maanden en bij afronding te vragen om een cijfer te geven voor hun situatie op de verschillende levensdomeinen;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">2.</span>
+                        <span class="content">Door het afnemen van de ICECAP vragenlijst (minimaal) bij de start en afronding van het ondersteuningstraject.</span>
+                    </div>
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Wie is de partij die verantwoordelijk is voor de impact meting en hoe ziet de relatie met die partij eruit?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De impact metingen (ervaren gezondheid en kosten) worden deels gedaan door GelijkGezond en voor specifiek voor zorgkosten door een nog aan te wijzen onderzoekspartner. Zie ook voorgaande vragen.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="category">
+                <div class="category-header">
+                    <span>Operationele uitdagingen en risicobeheer</span>
+                    <span class="toggle-icon">+</span>
+                </div>
+                <div class="category-items">
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Welke capaciteit projectie is er per doorbijter? Welk bewijs ondersteunt deze capaciteitsprojectie en welke aanpassingen zijn mogelijk nodig als de vraag de verwachtingen overtreft? Want het is bijvoorbeeld te lezen dat ze 15-25 cases tegelijkertijd hebben.</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De verwachte capaciteit is ingeschat langs twee assen.<br><div class="list-item numbered">
+                        <span class="number">1.</span>
+                        <span class="content">In de geanalyseerde pilots is gekeken naar de gemiddelde ondersteuningskosten die per inwoner zijn gemaakt. Deze kosten vormen de input voor het financieel model. Deze ondersteuningskosten zijn vervolgens afgezet, tegen de (totale) personeelskosten van een doorbijter waaruit de caseload ratio is afgeleid;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">2.</span>
+                        <span class="content">In gesprekken met vergelijkbare initiatieven zijn ervaringen opgehaald. Bijvoorbeeld de (wettelijk verplichte) gemeentelijke initiatieven voor ondersteuning van huishoudens die slachtoffer zijn geworden van de toeslagenaffaire. Ook deze initiatieven werken met vergelijkbare caseloads.</span>
+                    </div><br><br>Het aantal doorbijters kunnen we op- of afschalen afhankelijk van hetgeen nodig is. De hoeveelheid inwoners die we in de startfase kunnen ondersteunen is echter wel begrensd op maximaal 500 per gemeente en maximaal 2.000 in totaal vanwege begrenzingen in de resultaatbetalingsafspraken met gemeentes en zorgverzekeraars (noot: de resultaatbetalingsafspraken zijn work-in-progress, zie ook dataroom sectie 4.C).
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Het plan geeft aan dat 35% van de operationele cash-in is gebaseerd op daadwerkelijke kostenbesparingen in gemeentelijke domeinen. Welke noodplannen bestaan er als deze kostenbesparingen niet aan de prognoses voldoen?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            Merk als eerste op dat deze 35% is afgeleid uit het financieel model. In het financieel model wordt gerekend met een gemiddelde resultaatbetaling van de gemeentes van €3.100 per inwoner. Dit bedrag is aanzienlijk lager dan de maximale resultaatbetaling van €5.000 per inwoner. Gezien het  gemiddelde resultaat in de pilotprojecten van €20.000 is hier een ruime veiligheidsmarge gemodelleerd.<br>
+Als de gemeentelijke opbrengst desondanks toch verder tegenvalt zijn er drie routes om dit op te vangen<br><div class="list-item numbered">
+                        <span class="number">1.</span>
+                        <span class="content">Interen op de eindbuffer. In het financieel model resteert aan het einde van de startfase een positief kassaldo. Dat geeft ruimte voor (beperkte) kostenstijging gedurende fase 1;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">2.</span>
+                        <span class="content">Inzet van de ‘onvoorzien’ middelen. Jaarlijks is een post van 10% onvoorzien opgenomen;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">3.</span>
+                        <span class="content">Verlagen van kosten.</span>
+                    </div>
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Hoe wordt ervoor gezorgd dat de "doorbijters" de meest kwetsbare personen binnen de minimuminkomenspopulatie bereiken? Hoe heeft de huisarts deze persoon in beeld als deze niet langskomt? Of is het geaccepteerd dat deze persoon dan buiten de aanpak valt?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            Huisartsen krijgen op twee manieren inwoners in beeld die baat kunnen hebben bij de ondersteuning van een doorbijter:<br><div class="list-item numbered">
+                        <span class="number">1.</span>
+                        <span class="content">In de spreekkamer: huisartsen zien sommige patiënten met regelmaat terug in hun spreekkamer die komen met medische klachten waarbij zij het vermoeden hebben of weten dat hier problematiek op andere levensdomeinen onderliggend aan is. Deze inwoners kunnen zij introduceren bij een doorbijter;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">2.</span>
+                        <span class="content">Door proactieve screening: huisarts screent zijn patiëntenbestand, mede op basis van de zorgen die de huisarts heeft (of omdat de inwoner vaak langskomt, of omdat de inwoner uit beeld is terwijl er wel veel aan de hand is) en overlegt tijdens dat proces met een doorbijter om te zien welke patiënten baat zouden hebben bij ondersteuning. Deze patiënten kunnen daarna door de huisarts worden uitgenodigd voor een bezoek aan de praktijk om te bespreken of de inschatting van de huisarts juist is.</span>
+                    </div><br><br>Dit alles laat onverlet dat er ook inwoners zullen zijn die op deze wijze niet worden bereikt. Hoewel dat jammer is, is dat onvermijdelijk en daarmee ook geaccepteerd.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Welke wachttijden zijn acceptabel of onvermijdelijk, en hoe gaat Gelijk Gezond hiermee om?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            GelijkGezond zal, zeker in de startfase, niet in staat zijn om alle inwoners die gebaat zijn bij ondersteuning door een doorbijter, kunnen ondersteunen. Omdat we begrensd zijn vanuit afspraken met resultaatbetalers, en omdat we begrensd zijn in capaciteit. Met huisartsen moeten we derhalve goed kijken welke inwoners op welk moment het meeste baat hebben bij ondersteuning.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Hoe wordt het draagvlak bij de huisartsen gecreëerd? En hoe is de ervaring hier nu mee?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            Huisartsen zijn een belangrijke partner voor GelijkGezond. In alle gemeenten waar we in gesprek zijn, zijn zij één van de eerste partijen waar we mee contact leggen. Dit contact zoeken we met het bestuur van de regionale huisartsenorganisatie en, al dan niet via het bestuur, met individuele huisartsen die praktijk houden in wijken of buurten waar onze doelgroep oververtegenwoordigd is.
+<br>Onze ervaring is dat juist de huisartsen die werken in deze buurten het probleem herkennen waarmee onze doelgroep worstelt én dat zij -mede vanwege hun keuze om in deze buurten te werken- open staan voor nieuwe initiatieven. Met deze huisartsen werken we concreet uit hoe de ondersteuning van de doorbijter het beste vorm kan krijgen.<br>
+Andersom zoeken de inwoners die horen tot de doelgroep van GelijkGezond ook de huisartsen op. De huisartsen zijn vaak voor deze inwoners nog de enige vertrouwde adviseur, omdat ze “het systeem” niet vertrouwen. Sociale wijkteams en jeugdteams hebben vaak de connotatie met ontnemen van inkomen of kinderen. De huisarts is vaak de enige partij die zij actief opzoeken, terwijl de huisarts de complexiteit aan problemen (gemedicaliseerde sociale problematiek) niet op kan lossen. De zorgplicht van de huisartsen dwingt hen om de inwoners te blijven ontvangen. Door de introductie van de doorbijter kan de huisarts afspraken maken met de inwoner over effectieve ondersteuning en daarmee ook iets bieden dat recht doet aan hun zorgplicht, maar ook recht doet aan de problemen van de inwoner.<br>
+In alle gemeentes waar we spreken is onze ervaring dat huisartsen open staan voor GelijkGezond. En, op basis van onze ervaringen  in Amersfoort, dat hun enthousiasme groeit op het moment dat we daadwerkelijk starten met het ondersteunen van inwoners en zij in de praktijk ervaren hoe de doorbijter de inwoner ondersteunt.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="category">
+                <div class="category-header">
+                    <span>Personeelszaken en bestuur</span>
+                    <span class="toggle-icon">+</span>
+                </div>
+                <div class="category-items">
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Hoe gaan jullie de gekwalificeerde "doorbijters" werven, trainen en behouden, gezien de uitdagende aard van de rol?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            Ons voorkeursmodel is dat we de doorbijters gedetacheerd krijgen vanuit andere zorg- en welzijnsorganisaties die actief zijn in de specifieke gemeente. Op die manier kunnen we de samenwerking met deze organisaties vanaf de start goed verankeren én krijgen we doorbijters die ook als individu verankerd zijn in het lokale systeem.<br>
+Mocht dat in specifieke gevallen niet lukken dan zijn er twee alternatieve routes<br><div class="list-item numbered">
+                        <span class="number">1.</span>
+                        <span class="content">Zelf aannemen van doorbijters. Wij zijn ervan overtuigd, en horen van terug van potentiële kandidaten, dat de context die GelijkGezond kan bieden aan professionals voor een specifieke groep, namelijk de groep die graag een stapje extra zet voor inwoners en zich nu begrensd voelt in de organisatie waarin ze werken, zo aantrekkelijk is dat zij de overstap willen maken;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">2.</span>
+                        <span class="content">Inzet van ZZP’ers. Andere initiatieven, zoals bijvoorbeeld gemeentelijke projecten rondom de hersteloperatie kindertoeslagen, werken met de inzet van ZZP’ers. Dit zijn vaak professionals met een achtergrond in de zorg of welzijn die willen werken in een context die meer autonomie biedt. Dat sluit aan bij de context die GelijkGezond wil creëren.</span>
+                    </div><br><br>GelijkGezond start in iedere gemeente met een klein team van ~5 doorbijters. Daarmee is de wervingsopdracht van een andere orde dan voor grote zorg- en welzijnsorganisaties.<br><br>Om de doorbijters in staat te stellen hun rol uit te voeren wordt een trainings- en ontwikkelingsprogramma ontwikkeld.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Welke rol spelen ervaringsdeskundigen (in bijvoorbeeld de werving of training van doorbijters) en hoe wordt hun kennis geborgd?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            Op dit moment (april 2025) is de rol van ervaringsdeskundigheid nog beperkt vormgegeven. Wel onderzoeken we actief mogelijkheden om dit te doen:<br><div class="list-item numbered">
+                        <span class="number">1.</span>
+                        <span class="content">We zijn in gesprek met FNO om via hen aansluiting te krijgen bij ervaringsdeskundigen;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">2.</span>
+                        <span class="content">We zijn in gesprek met Hogeschool Windesheim (Lectoraat welzijn / Lector Alie Weerman)</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">3.</span>
+                        <span class="content">We zoeken aansluiting bij ‘weg van de armoede’</span>
+                    </div><br><br>Daarnaast zien we dat de doorbijters die we werven vaak zelf ervaringskennis hebben. Met onder andere Alie Weerman bespreken we op welke wijze we deze kennis naar deskundigheid kunnen ontwikkelen.<br>
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Welke bevoegdheden heeft de RvT om te sturen op de impactdoelstellingen en financiële gezondheid van de stichting?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De RvT is het hoogste besluitvormingsorgaan van de Stichting GelijkGezond. Zij stelt de strategisch koers van de organisatie vast inclusief het (meerjaren) financiële plan. Daarnaast is de RvT de werkgever van de bestuursleden van de stichting (april 2025: Joris van Eijck, Anouk Op het Veld, Marcel Geurts) en heeft zij alle bevoegdheden die daarbij horen.
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="category">
+                <div class="category-header">
+                    <span>Systeemverandering en beleid</span>
+                    <span class="toggle-icon">+</span>
+                </div>
+                <div class="category-items">
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Het model is gericht op het overbruggen van de kloof tussen gezondheidszorg en sociale domeinen. Hoe wordt gezorgd dat de doorbijter voldoende kennis heeft over beide hoeken en hierbinnen de juiste doorverwijzing en contacten kan leggen?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            Op een aantal manieren proberen we dit te realiseren<br><div class="list-item numbered">
+                        <span class="number">1.</span>
+                        <span class="content">We werven doorbijters met een oog voor problematiek op alle levensdomeinen, professionals die breed willen kijken en zich begrensd voelen door de context waarin ze vandaag werken;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">2.</span>
+                        <span class="content">We stellen een team samen met doorbijters met verschillende professionele achtergronden: zorg (bijvoorbeeld een POH), welzijn (een wijkteammedewerker), een (opgeleide) ervaringsdeskundige, een financiële achtergrond. Deze doorbijters pakken richting de inwoners die zij ondersteunen allen een zelfde rol en tegelijkertijd kunnen zij elkaar ondersteunen vanuit hun specifieke achtergrond;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">3.</span>
+                        <span class="content">We trainen de doorbijters in de GelijkGezond methodiek. De methodiek wordt beschreven in het handboek GelijkGezond (zie dataroom sectie 5.A voor een CONCEPT versie van het handboek). De training is gericht op het vergroten van de autonomie en regie van de doorbijter;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">4.</span>
+                        <span class="content">We sluiten aan op bestaande systemen en positioneren ons toch erboven. Hiervoor hebben we stuur- en voortgangsoverleggen ingeregeld met daarin beslissers uit de systemen. Als escalatie-pad maar ook gericht op impliciet leren en verbeteren;</span>
+                    </div><br><div class="list-item numbered">
+                        <span class="number">5.</span>
+                        <span class="content">Door het organiseren van intervisiebijeenkomsten binnen en tussen gemeenten, waarin ook concrete inwoner situatie worden besproken, werken we continu aan het verbreden van het perspectief van de doorbijters. </span>
+                    </div>
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="question">
+                            <span>Kan een uitgebreider schriftelijk overzicht worden gegeven van de domein overstijgende aanpak van Gelijk Gezond? Hoe worden de verschillende levensdomeinen van een persoon met elkaar verbonden?</span>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="answer">
+                            De methodiek wordt beschreven in het handboek GelijkGezond (zie dataroom sectie 5.A voor een CONCEPT versie van het handboek).
+                            <div class="date">4-4-2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Date range picker functionality
+            const dateRangePicker = document.getElementById('dateRange');
+            const dateRangePopup = document.querySelector('.date-range-popup');
+            const dateStart = document.getElementById('dateStart');
+            const dateEnd = document.getElementById('dateEnd');
+            const applyDateRange = document.getElementById('applyDateRange');
+
+            dateRangePicker.addEventListener('click', () => {
+                dateRangePopup.classList.toggle('active');
+            });
+
+            // Close popup when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!dateRangePicker.contains(e.target) && 
+                    !dateRangePopup.contains(e.target)) {
+                    dateRangePopup.classList.remove('active');
+                }
+            });
+
+            function formatDate(date) {
+                if (!date) return '';
+                const d = new Date(date);
+                return d.toLocaleDateString('nl-NL', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            function updateDateRangeText() {
+                const start = dateStart.value;
+                const end = dateEnd.value;
+                if (start && end) {
+                    dateRangePicker.value = `${formatDate(start)} - ${formatDate(end)}`;
+                } else if (start) {
+                    dateRangePicker.value = `Vanaf ${formatDate(start)}`;
+                } else if (end) {
+                    dateRangePicker.value = `Tot ${formatDate(end)}`;
+                } else {
+                    dateRangePicker.value = '';
+                    dateRangePicker.placeholder = 'Selecteer datum bereik';
+                }
+            }
+
+            dateStart.addEventListener('change', () => {
+                if (dateStart.value && dateEnd.value && new Date(dateStart.value) > new Date(dateEnd.value)) {
+                    dateEnd.value = dateStart.value;
+                }
+                updateDateRangeText();
+            });
+
+            dateEnd.addEventListener('change', () => {
+                if (dateStart.value && dateEnd.value && new Date(dateEnd.value) < new Date(dateStart.value)) {
+                    dateStart.value = dateEnd.value;
+                }
+                updateDateRangeText();
+            });
+
+            applyDateRange.addEventListener('click', () => {
+                updateDateRangeText();
+                dateRangePopup.classList.remove('active');
+                filterItems();
+            });
+
+            // Convert Dutch date format to ISO format for date input
+            function dutchToISODate(dutchDate) {
+                const parts = dutchDate.split('-');
+                if (parts.length === 3) {
+                    // Ensure parts are padded with leading zeros
+                    const day = parts[0].padStart(2, '0');
+                    const month = parts[1].padStart(2, '0');
+                    const year = parts[2];
+                    return `${year}-${month}-${day}`;
+                }
+                return '';
+            }
+
+            // Search functionality
+            const searchInput = document.getElementById('search');
+            const faqItems = document.querySelectorAll('.faq-item');
+            const expandAllButton = document.getElementById('expandAll');
+
+            searchInput.addEventListener('input', filterItems);
+
+            function filterItems() {
+                const searchTerm = searchInput.value.toLowerCase();
+                
+                // Parse dates and set time to start/end of day
+                let startDate = null;
+                let endDate = null;
+                
+                if (dateStart.value) {
+                    startDate = new Date(dateStart.value);
+                    startDate.setHours(0, 0, 0, 0);
+                }
+                
+                if (dateEnd.value) {
+                    endDate = new Date(dateEnd.value);
+                    endDate.setHours(23, 59, 59, 999);
+                }
+
+                faqItems.forEach(item => {
+                    const question = item.querySelector('.question').textContent.toLowerCase();
+                    const answer = item.querySelector('.answer').textContent.toLowerCase();
+                    const dateText = item.querySelector('.date').textContent.trim();
+                    
+                    // Parse item date
+                    let itemDate = null;
+                    const isoDate = dutchToISODate(dateText);
+                    if (isoDate) {
+                        itemDate = new Date(isoDate);
+                        itemDate.setHours(12, 0, 0, 0);  // Set to noon to avoid timezone issues
+                    }
+                    
+                    const matchesSearch = question.includes(searchTerm) || answer.includes(searchTerm);
+                    const matchesDate = !itemDate || // If no valid date, show item
+                        (!startDate && !endDate) || // If no date filter, show item
+                        (startDate && !endDate && itemDate >= startDate) || // Only start date
+                        (!startDate && endDate && itemDate <= endDate) || // Only end date
+                        (startDate && endDate && itemDate >= startDate && itemDate <= endDate); // Date range
+
+                    item.style.display = matchesSearch && matchesDate ? 'block' : 'none';
+                    
+                    // Show/hide parent category based on visible items
+                    const category = item.closest('.category');
+                    const visibleItems = category.querySelectorAll('.faq-item[style*="display: block"]');
+                    if (visibleItems.length > 0) {
+                        category.style.display = 'block';
+                    } else {
+                        category.style.display = 'none';
+                    }
+                });
+            }
+
+            // Expand all categories button
+            expandAllButton.addEventListener('click', () => {
+                const categories = document.querySelectorAll('.category-items');
+                const questions = document.querySelectorAll('.answer');
+                const categoryIcons = document.querySelectorAll('.category-header .toggle-icon');
+                
+                categories.forEach(category => {
+                    category.style.display = 'block';
+                });
+                
+                questions.forEach(answer => {
+                    answer.style.display = 'none';
+                });
+                
+                categoryIcons.forEach(icon => {
+                    icon.textContent = '-';
+                });
+
+                // Update button text based on state
+                if (expandAllButton.textContent === 'Alle categorieën uitvouwen') {
+                    expandAllButton.textContent = 'Alle categorieën invouwen';
+                } else {
+                    expandAllButton.textContent = 'Alle categorieën uitvouwen';
+                    categories.forEach(category => {
+                        category.style.display = 'none';
+                    });
+                    categoryIcons.forEach(icon => {
+                        icon.textContent = '+';
+                    });
+                }
+            });
+
+            // Toggle functionality
+            document.querySelectorAll('.category-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const category = header.parentElement;
+                    const items = category.querySelector('.category-items');
+                    const icon = header.querySelector('.toggle-icon');
+                    
+                    items.style.display = items.style.display === 'none' ? 'block' : 'none';
+                    icon.textContent = items.style.display === 'none' ? '+' : '-';
+                });
+            });
+
+            document.querySelectorAll('.question').forEach(question => {
+                question.addEventListener('click', () => {
+                    const answer = question.nextElementSibling;
+                    const icon = question.querySelector('.toggle-icon');
+                    
+                    answer.style.display = answer.style.display === 'none' ? 'block' : 'none';
+                    icon.textContent = answer.style.display === 'none' ? '+' : '-';
+                });
+            });
+
+            // Initially hide all answers and categories
+            document.querySelectorAll('.category-items').forEach(items => {
+                items.style.display = 'none';
+            });
+            document.querySelectorAll('.answer').forEach(answer => {
+                answer.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
